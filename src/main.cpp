@@ -29,6 +29,7 @@ enum colorEnum {RED, GREEN, BLUE};
 //dlf int getDistance();
 boolean checkSwitch(uint8_t pin);
 void flashLED(colorEnum color, uint8_t brightness, int howLong);
+int checkForObject();
 
 // Misc definitions
 const uint8_t SWITCH_PRESSED    = 0;  // Using switches to ground with a GPIO internal pullup so "pressed" = a zero
@@ -40,6 +41,7 @@ const uint8_t RELAY_OFF  = 1;
 VL53L0X_RangingMeasurementData_t measureLaserRange;
 Adafruit_VL53L0X laserRanger = Adafruit_VL53L0X();
 int distanceToObject = 5000;   // Set to big default number in case we want to test for out of range
+int nearAlarmDist, mediumAlarmDist;
 
 // **************   I/O Pin Definitions  *********
 const uint8_t BUZZER = 2;           // Buzzer + pin
@@ -55,13 +57,13 @@ boolean airArmed = false;   // True if we have the air puffer enabled
 boolean outOfAir = false;   // Keep track of when we're out of air
 
 // air puffer
-const uint8_t MAX_PUFFS = 15;         // The number of puffs per fill of the tank
+const uint8_t MAX_PUFFS = 12;         // The number of puffs per fill of the tank
 const int PUFF_LOCKOUT_TIME = 5000;   // Amount of time before we will puff again
 uint8_t puffsSoFar = 0;               // Keep track of the number of puffs so we can signal when out of air 
 int puffLength = 100;                 // How long the air valve will be on (ms)
 
 // Timer vars
-const int CHECK_INTERVAL = 100;               // How often to check the range sensor
+const int CHECK_INTERVAL = 200;               // How often to check the range sensor
 unsigned long lastCheck = millis();           // For checking the last time we did a distance ranging
 const int OUT_OF_AIR_FLASH_INTERVAL = 1000;   // Out of air flasher period
 unsigned long outOfAirFlasherLastCheck = millis();  // For blinking the out of air led
@@ -112,7 +114,6 @@ void setup() {
 //##########################################################################
 void loop() {
 
-  int nearAlarmDist, mediumAlarmDist;
 
   if(checkSwitch(DISARM_AIR_SWITCH) == SWITCH_PRESSED) {
     airArmed = false;
@@ -127,15 +128,7 @@ void loop() {
 
   // Periodically check the range sensor.
   if(millis() >= lastCheck+CHECK_INTERVAL) {
-    laserRanger.rangingTest(&measureLaserRange, false); // pass in 'true' to get debug data printout!
-    if(measureLaserRange.RangeStatus != 4) {   // 4 indicates out of range
-       distanceToObject = measureLaserRange.RangeMilliMeter;
-       if(distanceToObject <= nearAlarmDist) {
-         Serial.print(F("laserRange NEAR: ")); Serial.println(distanceToObject);
-       } else if(distanceToObject <= mediumAlarmDist) {
-         Serial.print(F("laserRange MEDIUM: ")); Serial.println(distanceToObject);
-       }
-    }
+    distanceToObject = checkForObject();
     lastCheck = millis();
   }
 
@@ -187,6 +180,33 @@ void loop() {
 //##########################################################################
 // Functions
 //##########################################################################
+
+// Check for any object, if we find one within range, check again.  If successive results are within 50mm 
+// of previous, then return the average distance (in mm), else return out-of-range value (5000)
+int checkForObject() {
+  int curMeasurement;
+  int aveMeasurement = 0;
+
+  for(uint8_t i=0; i<3 ; i++) {
+    laserRanger.rangingTest(&measureLaserRange, false); // pass in 'true' to get debug data printout!
+    if(measureLaserRange.RangeStatus != 4) {   // 4 indicates out of range
+       curMeasurement =  measureLaserRange.RangeMilliMeter;
+       if(i == 0) {
+         aveMeasurement = curMeasurement;
+         continue;
+       }
+       if(abs(aveMeasurement - curMeasurement) > 50) {
+         return(5000);
+       }
+       aveMeasurement = (aveMeasurement + curMeasurement) / (i+1);
+       delay(50);
+    } else {
+      return(5000);
+    }
+  }  
+  return(aveMeasurement);
+}
+
 
 // Flash the LED
 void flashLED(colorEnum color, uint8_t brightness, int howLong) {
