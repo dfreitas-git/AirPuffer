@@ -19,15 +19,15 @@ NEAR gets set to 50% of MEDIUM.
 ## Parts List
 - Arduino Nano
 - 5V relay board
-- VL53L0X laser range finder
-- 12v air-valve 
-- RGB LED
+- VL53L0X laser range finder module ( https://www.amazon.com/gp/product/B08RRT1KJ6/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&th=1 )
+- 12v air-valve  (Search Amazon for: Beduan 2 Way Normally Closed DC 12V Electric Solenoid Air Valve 1/4" NPT )
+- RGB LED (four-pin common cathode)
 - 5v continuous sounding Piezo-Buzzer
 - 12v/1A wall-wart power supply
 - Old CD storage case
 - 50K potentiometer for range-control
 - Common Resistors/Caps/Diodes/Switches
-- 2" PVC with reducers to get to 1/4 NPT fittings for filler-valve and air-switch
+- 2" PVC with reducers to get to 1/4 NPT fittings for Schrader-filler-valve and air-valve
 
 dlf  2/28/2024
 
