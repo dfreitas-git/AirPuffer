@@ -11,8 +11,7 @@ Red flashing means air-puffer is enabled.  Green flashing means just the buzzer 
 flashing blue to indicate you are out of air.  The buzzer will still function, just the air puffer will be disabled.
 Note, if you power up with a partial air fill,  the count will not reflect your actual available air.
 
-* The detection zone is controlled with a potentiometer that will adjust from 0mm to 1023mm.  This defines the MEDIUM zone.  
-NEAR gets set to 50% of MEDIUM.
+* The detection zone is controlled with a potentiometer that will adjust from 0mm to 1023mm.  This defines the MEDIUM zone.  NEAR gets set to 50% of MEDIUM.
 
 * Inspired by a project on Instructables at https://www.instructables.com/Pet-Deterrent-keep-them-away-from-those-off-limits/
 
