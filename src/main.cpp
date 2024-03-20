@@ -130,7 +130,7 @@ void loop() {
   if(millis() >= lastCheck+CHECK_INTERVAL) {
     distanceToObject = checkForObject();
     lastCheck = millis();
-  }
+ }
 
   // If getting close, buzz the warning buzzer
   if(distanceToObject <= mediumAlarmDist) {
@@ -189,6 +189,7 @@ int checkForObject() {
 
   for(uint8_t i=0; i<3 ; i++) {
     laserRanger.rangingTest(&measureLaserRange, false); // pass in 'true' to get debug data printout!
+    delay(50);
     if(measureLaserRange.RangeStatus != 4) {   // 4 indicates out of range
        curMeasurement =  measureLaserRange.RangeMilliMeter;
        if(i == 0) {
@@ -198,8 +199,7 @@ int checkForObject() {
        if(abs(aveMeasurement - curMeasurement) > 50) {
          return(5000);
        }
-       aveMeasurement = (aveMeasurement + curMeasurement) / (i+1);
-       delay(50);
+       aveMeasurement = (aveMeasurement + curMeasurement) / 2;
     } else {
       return(5000);
     }
